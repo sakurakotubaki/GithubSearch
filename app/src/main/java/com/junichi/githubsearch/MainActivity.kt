@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,15 +40,27 @@ class ThemeManager {
     fun toggleTheme() {
         isDarkMode = !isDarkMode
     }
+
+    fun setSystemTheme(isDark: Boolean) {
+        isDarkMode = isDark
+    }
 }
 
 class MainActivity : ComponentActivity() {
+    private val themeManager = ThemeManager()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val systemInDarkTheme = isSystemInDarkTheme()
+            
+            // システムのテーマ変更を監視
+            LaunchedEffect(systemInDarkTheme) {
+                themeManager.setSystemTheme(systemInDarkTheme)
+            }
+            
             GithubSearchTheme {
-                val themeManager = remember { ThemeManager() }
                 MaterialTheme(
                     colorScheme = if (themeManager.isDarkMode) darkColorScheme() else lightColorScheme()
                 ) {
