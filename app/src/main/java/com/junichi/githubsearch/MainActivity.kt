@@ -17,6 +17,29 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.junichi.githubsearch.ui.theme.GithubSearchTheme
 import com.junichi.githubsearch.viewmodel.MainViewModel
+import kotlin.reflect.KProperty
+
+// テーマの設定を管理するデリゲートクラス
+class ThemeDelegate {
+    private var darkMode by mutableStateOf(false)
+    
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): Boolean {
+        return darkMode
+    }
+    
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
+        darkMode = value
+    }
+}
+
+// テーマの設定を使用するクラス
+class ThemeManager {
+    var isDarkMode: Boolean by ThemeDelegate()
+    
+    fun toggleTheme() {
+        isDarkMode = !isDarkMode
+    }
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,16 +47,46 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GithubSearchTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                val themeManager = remember { ThemeManager() }
+                MaterialTheme(
+                    colorScheme = if (themeManager.isDarkMode) darkColorScheme() else lightColorScheme()
                 ) {
-                    GitHubSearchScreen()
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = if (themeManager.isDarkMode) "ダークモード" else "ライトモード",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Switch(
+                                    checked = themeManager.isDarkMode,
+                                    onCheckedChange = { themeManager.toggleTheme() }
+                                )
+                            }
+                            
+                            Text(
+                                text = "現在のテーマ: ${if (themeManager.isDarkMode) "ダーク" else "ライト"}",
+                                modifier = Modifier.padding(top = 16.dp),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        GitHubSearchScreen()
+                    }
                 }
             }
         }
     }
-}
+}`
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
