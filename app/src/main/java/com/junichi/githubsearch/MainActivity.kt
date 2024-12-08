@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}`
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,6 +101,7 @@ fun GitHubSearchScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        Spacer(modifier = Modifier.height(35.dp))
         TextField(
             value = searchQuery,
             onValueChange = { 
