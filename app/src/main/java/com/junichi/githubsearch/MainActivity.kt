@@ -96,82 +96,95 @@ fun GitHubSearchScreen(
     var searchQuery by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(35.dp))
-        TextField(
-            value = searchQuery,
-            onValueChange = { 
-                searchQuery = it
-                viewModel.searchRepositories(it)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search GitHub repositories...") }
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        when {
-            uiState.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            uiState.error != null -> {
-                Text(
-                    text = "Error: ${uiState.error}",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(16.dp)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("GitHub Repository Search") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
-            }
-            else -> {
-                LazyColumn {
-                    items(uiState.repositories) { repo ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                        ) {
-                            Row(
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            Spacer(modifier = Modifier.height(35.dp))
+            TextField(
+                value = searchQuery,
+                onValueChange = { 
+                    searchQuery = it
+                    viewModel.searchRepositories(it)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Search GitHub repositories...") }
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            when {
+                uiState.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                uiState.error != null -> {
+                    Text(
+                        text = "Error: ${uiState.error}",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+                else -> {
+                    LazyColumn {
+                        items(uiState.repositories) { repo ->
+                            Card(
                                 modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
                             ) {
-                                // Avatar image
-                                AsyncImage(
-                                    model = repo.owner.avatarUrl,
-                                    contentDescription = "Avatar for ${repo.owner.login}",
+                                Row(
                                     modifier = Modifier
-                                        .size(48.dp),
-                                    contentScale = ContentScale.Crop
-                                )
-                                
-                                // Repository details
-                                Column {
-                                    Text(
-                                        text = repo.fullName,
-                                        style = MaterialTheme.typography.titleMedium
+                                        .padding(16.dp)
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    // Avatar image
+                                    AsyncImage(
+                                        model = repo.owner.avatarUrl,
+                                        contentDescription = "Avatar for ${repo.owner.login}",
+                                        modifier = Modifier
+                                            .size(48.dp),
+                                        contentScale = ContentScale.Crop
                                     )
-                                    repo.description?.let { description ->
+                                    
+                                    // Repository details
+                                    Column {
                                         Text(
-                                            text = description,
-                                            style = MaterialTheme.typography.bodyMedium
+                                            text = repo.fullName,
+                                            style = MaterialTheme.typography.titleMedium
                                         )
-                                    }
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        modifier = Modifier.padding(top = 4.dp)
-                                    ) {
-                                        Text("⭐ ${repo.stargazersCount}")
-                                        Text("👀 ${repo.watchersCount}")
-                                        Text("🔨 ${repo.forksCount}")
+                                        repo.description?.let { description ->
+                                            Text(
+                                                text = description,
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            modifier = Modifier.padding(top = 4.dp)
+                                        ) {
+                                            Text("⭐ ${repo.stargazersCount}")
+                                            Text("👀 ${repo.watchersCount}")
+                                            Text("🔨 ${repo.forksCount}")
+                                        }
                                     }
                                 }
                             }
