@@ -21,9 +21,13 @@ android {
             useSupportLibrary = true
         }
 
-        // Add GitHub token from project properties
-        val githubToken = project.findProperty("GITHUB_TOKEN") as String? ?: ""
-        buildConfigField("String", "GITHUB_TOKEN", "\"$githubToken\"")
+        // Load GitHub token from local.properties
+        val localProperties = project.rootProject.file("local.properties")
+            .readLines()
+            .firstOrNull { it.startsWith("GITHUB_TOKEN=") }
+            ?.substringAfter("=")
+            ?: ""
+        buildConfigField("String", "GITHUB_TOKEN", "\"$localProperties\"")
     }
 
     buildTypes {
